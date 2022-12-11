@@ -1,0 +1,3 @@
+parallelization: 4
+path.users: data/users
+path.clicks: data/clicks
