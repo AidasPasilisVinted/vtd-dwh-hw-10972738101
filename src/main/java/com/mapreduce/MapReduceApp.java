@@ -3,9 +3,8 @@ package com.mapreduce;
 import com.mapreduce.examples.model.User;
 import com.mapreduce.examples.parameters.Parameters;
 import com.mapreduce.examples.tasks.AggregationTask;
-import com.mapreduce.examples.tasks.JoinTask;
-import com.mapreduce.framework.executor.Task;
-import com.mapreduce.framework.reader.CsvReader;
+import com.mapreduce.framework.task.Task;
+import com.mapreduce.framework.mapper.Mapper;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -19,9 +18,18 @@ public class MapReduceApp {
         var params = loadParameters();
         var parallelization = params.getParallelization();
 
-        var aggregationTask = new AggregationTask<>(User.class, parallelization, params.getUsersPath());
+        var aggregationTask = new AggregationTask<>(User.class,
+                parallelization,
+                params.getUsersPath(),
+                new Mapper<>(user -> user.getId(),
+                        user -> user));
         runTask(aggregationTask);
-        //var joinTask = new JoinTask(parallelization, params.getClicksPath());
+        //var joinTask = new JoinTask(User.class,
+        //                parallelization,
+        //                params.getUsersPath(),
+        //                new Mapper<>(user -> "LT".equals(user.getCountry()),
+        //                        user -> user.getId(),
+        //                        user -> user));
         //runTask(joinTask);
     }
 
