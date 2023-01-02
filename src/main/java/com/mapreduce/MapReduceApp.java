@@ -1,13 +1,14 @@
 package com.mapreduce;
 
+import com.mapreduce.examples.model.Click;
 import com.mapreduce.examples.model.User;
-import com.mapreduce.examples.parameters.Parameters;
-import com.mapreduce.examples.tasks.AggregationTask;
+import com.mapreduce.framework.parameters.Parameters;
 import com.mapreduce.framework.task.Task;
 import com.mapreduce.framework.mapper.Mapper;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 public class MapReduceApp {
@@ -18,12 +19,20 @@ public class MapReduceApp {
         var params = loadParameters();
         var parallelization = params.getParallelization();
 
-        var aggregationTask = new AggregationTask<>(User.class,
-                parallelization,
-                params.getUsersPath(),
-                new Mapper<>(user -> user.getId(),
-                        user -> user));
+        var aggregationTask = new Task<>(parallelization,
+                List.of(new Mapper<>(Click.class,
+                        params.getDataPath("data.clicks"),
+                        click -> click.getDate(),
+                        click -> click)));
         runTask(aggregationTask);
+/*
+        var aggregationTask = new Task<>(parallelization,
+                List.of(new Mapper<>(User.class,
+                        params.getDataPath("data.users"),
+                        user -> user.getId(),
+                        user -> user)));
+
+        runTask(aggregationTask);*/
         //var joinTask = new JoinTask(User.class,
         //                parallelization,
         //                params.getUsersPath(),
