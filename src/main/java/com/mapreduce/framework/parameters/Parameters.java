@@ -14,7 +14,7 @@ public class Parameters {
         return (Integer) data.get(PARALLELIZATION);
     }
 
-    public String getDataPath(String paramName) {
+    public String get(String paramName) {
         return (String) data.get(paramName);
     }
 

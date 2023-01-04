@@ -30,7 +30,7 @@ tasks.getByName<Test>("test") {
 tasks.withType<Jar> {
     archiveFileName.set("mapreduce.jar")
     manifest {
-        attributes["Main-Class"] = "com.myproject.mapreduce.MapReduceApp"
+        attributes["Main-Class"] = "com.mapreduce.MapReduceApp"
     }
     dependsOn(configurations.runtimeClasspath)
     from({

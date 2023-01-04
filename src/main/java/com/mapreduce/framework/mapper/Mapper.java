@@ -1,6 +1,6 @@
 package com.mapreduce.framework.mapper;
 
-import com.mapreduce.framework.reader.CsvReader;
+import com.mapreduce.framework.csv.CsvReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 public class Mapper<T, K, V> {
 
+    private final Class<T> clazz;
     private final String filePath;
     private final Predicate<? super T> selectPredicate;
     private final Function<? super T, ? extends K> keyMapper;
@@ -33,6 +34,7 @@ public class Mapper<T, K, V> {
                   Predicate<? super T> selectPredicate,
                   Function<? super T, ? extends K> keyMapper,
                   Function<? super T, ? extends V> valueMapper) {
+        this.clazz = clazz;
         this.filePath = filePath;
         this.selectPredicate = selectPredicate;
         this.keyMapper = keyMapper;
@@ -43,35 +45,38 @@ public class Mapper<T, K, V> {
     public Map<K, List<V>> map() {
         Map<K, List<V>> result;
         if (selectPredicate != null) {
-            result = sort(selectAndMapRecords());
+            result = selectAndMapRecords();
         } else {
-            result = sort(mapRecords());
+            result = mapRecords();
         }
-        result.forEach((key, value) -> System.out.printf("\n{%s,%s}", key, value));
-        return result;
+        return sort(result);
+    }
+
+    public String getTypeName() {
+        return clazz.getSimpleName().toLowerCase();
     }
 
     private Map<K, List<V>> mapRecords() {
-        return readRecords().stream()
+        return readRecords().parallelStream()
                 .collect(Collectors.groupingBy(keyMapper,
                         Collectors.mapping(valueMapper, Collectors.toList())));
     }
 
     private Map<K, List<V>> selectAndMapRecords() {
-        return readRecords().stream()
+        return readRecords().parallelStream()
                 .filter(selectPredicate)
                 .collect(Collectors.groupingBy(keyMapper,
                         Collectors.mapping(valueMapper, Collectors.toList())));
     }
 
     private Map<K, List<V>> sort(Map<K, List<V>> map) {
-        return map.entrySet().stream()
+        return map.entrySet().parallelStream()
                 .sorted((c1, c2) -> ((Comparable) (c1.getKey())).compareTo(c2.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
     }
 
     private List<T> readRecords() {
-        var filesDir = new File(getClass().getClassLoader().getResource(filePath).getPath());
+        var filesDir = new File(System.getProperty("user.dir"), filePath);
         return Stream.of(filesDir.listFiles()).parallel()
                 .map(this::readFromFile)
                 .flatMap(f -> f.stream())

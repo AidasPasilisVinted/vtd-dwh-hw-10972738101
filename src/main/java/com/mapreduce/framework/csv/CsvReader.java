@@ -1,4 +1,4 @@
-package com.mapreduce.framework.reader;
+package com.mapreduce.framework.csv;
 
 import com.opencsv.bean.CsvToBeanBuilder;
 
@@ -7,7 +7,7 @@ import java.util.List;
 
 public class CsvReader<T> {
 
-    private Class<T> clazz;
+    private final Class<T> clazz;
 
     public CsvReader(Class<T> clazz) {
         this.clazz = clazz;

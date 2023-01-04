@@ -1,3 +1,5 @@
 parallelization: 4
 data.users: data/users
 data.clicks: data/clicks
+output.clicks.per.day: output\clicks_per_day.csv
+output.filtered.clicks: output\filtered_clicks.csv
